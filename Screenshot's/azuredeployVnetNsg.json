@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": 
+    [
+        {
+         "type": "Microsoft.Network/virtualNetworks",
+         "apiVersion": "2026-03-01",
+         "name": "vnet-az104-secure",
+            "location": "westus2",
+            "dependsOn": ["[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-management')]"],
+            "properties": 
+            
+            {
+               "addressSpace": 
+               {"addressPrefixes": [ "10.10.0.0/16" ]},    
+               "subnets":[
+                {
+                 "name": "snet-management",
+                 "properties": {
+                 "addressPrefix": "10.10.1.0/24",
+                 "networkSecurityGroup": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg-management')]" }     
+                }    
+               }
+              ]    
+            }
+        },
+        {     
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2026-03-01",
+            "name": "nsg-management",
+             "location": "westus2",
+            "properties": {
+            "securityRules":[
+            {
+             "name": "Deny-VNet-Inbound",
+             "properties": {
+             "access": "Deny",
+             "description": "Deny inbound traffic to management subnet",
+             "direction": "Inbound",
+             "priority": 4000,
+             "protocol": "*",
+             "sourceAddressPrefix": "VirtualNetwork",
+             "sourcePortRange":  "*",
+             "destinationAddressPrefix" : "10.10.1.0/24",
+             "destinationPortRange": "*"}
+            }
+          ]
+         }
+        } 
+    ]
+}
